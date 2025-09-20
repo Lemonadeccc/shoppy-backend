@@ -5,7 +5,7 @@ import { Response } from 'express';
 import { User } from '@prisma/client';
 import ms from 'ms';
 import { ConfigService } from '@nestjs/config';
-import { TokenPayload } from './token.payload.interface';
+import { TokenPayload } from './token-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
