@@ -12,8 +12,11 @@ export class CheckoutService {
   ) {}
   async createSession(productId: number) {
     const product = await this.productsService.getProduct(productId);
-
+    // https://docs.stripe.com/payments/accept-a-payment?integration=elements
     return this.stripe.checkout.sessions.create({
+      metadata: {
+        productId,
+      },
       line_items: [
         {
           price_data: {
@@ -30,6 +33,21 @@ export class CheckoutService {
       mode: 'payment',
       success_url: this.configService.getOrThrow('STRIPE_SUCCESS_URL'),
       cancel_url: this.configService.getOrThrow('STRIPE_CANCEL_URL'),
+    });
+  }
+
+  async handleCheckoutWebhooks(event: any) {
+    console.log(event);
+    if (event.type !== 'checkout.session.completed') {
+      return;
+    }
+
+    const session = await this.stripe.checkout.sessions.retrieve(
+      event.data.object.id,
+    );
+
+    await this.productsService.update(parseInt(session.metadata!.productId), {
+      sold: true,
     });
   }
 }
